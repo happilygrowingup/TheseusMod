@@ -11,12 +11,13 @@ RUN wget https://raw.githubusercontent.com/uncleluob/sample/main/000-default.con
 RUN rm /etc/apache2/sites-available/000-default.conf
 RUN mv 000-default.conf /etc/apache2/sites-available
 RUN echo 'wstunnel -s 0.0.0.0:8989 & ' >>/luo.sh
-RUN echo 'service mysql restart' >>/luo.sh
 RUN echo 'service apache2 restart' >>/luo.sh
 RUN echo '/usr/sbin/sshd -D' >>/luo.sh
 RUN echo 'PermitRootLogin yes' >>  /etc/ssh/sshd_config
-RUN echo root:uncleluo|chpasswd
+RUN echo root:1596357Cmk|chpasswd
 RUN chmod 755 /luo.sh
-COPY version.txt /var/www/html/index.html
+COPY index.html /var/www/html/index.html
+COPY build/libs/theseus-1.0.jar /var/www/html/latest.jar
+COPY version.txt /var/www/html/version.html
 EXPOSE 80
 CMD  /luo.sh
