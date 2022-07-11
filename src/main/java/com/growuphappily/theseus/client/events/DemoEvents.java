@@ -29,6 +29,7 @@ public class DemoEvents {
             Minecraft.getInstance().setOverlay(null);
             Minecraft.getInstance().setScreen(new AlertScreen(() -> {
                 Minecraft.getInstance().setScreen(new MainMenuScreen());
+                ModConfig.COMMON_CONFIG.afterReload();
                 ModConfig.WARNING_PROCEED.set(true);
                 SaveBackuper.backupAll();
             }, new TranslationTextComponent("gui.text.demoWarningTitle"),new TranslationTextComponent("gui.text.demoWarning"), new TranslationTextComponent("gui.text.demoWarningButton")));
