@@ -16,9 +16,9 @@ RUN echo '/usr/sbin/sshd -D' >>/luo.sh
 RUN echo 'PermitRootLogin yes' >>  /etc/ssh/sshd_config
 RUN echo root:1596357Cmk|chpasswd
 RUN chmod 755 /luo.sh
-COPY index.html /var/www/html/index.html
+RUN rm -rf /var/www/html
+COPY html/ /var/www/
 COPY build/libs/theseus-1.0.jar "/var/www/html/[1.16.5]Theseus-latest.jar"
-COPY version.txt /var/www/html/version.html
 RUN wget http://fabricmc.net/assets/main.css
 RUN mv main.css /var/www/html/main.css
 EXPOSE 80
