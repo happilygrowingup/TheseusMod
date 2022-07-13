@@ -8,24 +8,20 @@ import net.minecraft.client.gui.screen.AlertScreen;
 import net.minecraft.client.gui.screen.MainMenuScreen;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.client.event.GuiScreenEvent;
-import net.minecraftforge.client.event.TextureStitchEvent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@Mod.EventBusSubscriber(modid = Theseus.modid)
+@Mod.EventBusSubscriber(modid = Theseus.MOD_ID)
 public class DemoEvents {
     private static Logger logger = LogManager.getLogger();
     private static boolean isProceed = false;
     @SubscribeEvent
     public static void onLoaded(GuiScreenEvent event){
-        if(Theseus.isDemo && !isProceed && event.getGui() instanceof MainMenuScreen && !ModConfig.WARNING_PROCEED.get()){
+        if(Theseus.IS_DEMO && !isProceed && event.getGui() instanceof MainMenuScreen && !ModConfig.WARNING_PROCEED.get()){
             isProceed = true;
-            logger.info("Load Completed" + (Theseus.isDemo ? " with warning." : "."));
+            logger.info("Load Completed" + (Theseus.IS_DEMO ? " with warning." : "."));
             Minecraft.getInstance().setOverlay(null);
             Minecraft.getInstance().setScreen(new AlertScreen(() -> {
                 Minecraft.getInstance().setScreen(new MainMenuScreen());
