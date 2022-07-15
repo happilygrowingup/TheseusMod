@@ -1,12 +1,15 @@
 package com.growuphappily.theseus.world.player;
 
 import com.growuphappily.theseus.Theseus;
+import com.growuphappily.theseus.network.Networking;
+import com.growuphappily.theseus.network.PacketGenAttribute;
 import com.growuphappily.theseus.util.Dice;
 import com.growuphappily.theseus.world.WorldData;
-import com.growuphappily.theseus.world.player.effects.EffectDizzy;
 import com.growuphappily.theseus.world.player.effects.EffectPowerless;
 import com.growuphappily.theseus.world.player.effects.EnumPlayerState;
+import com.growuphappily.theseus.world.player.identity.IIdentity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
 import net.minecraftforge.event.TickEvent;
@@ -18,6 +21,7 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraftforge.fml.network.PacketDistributor;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
@@ -27,6 +31,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @Mod.EventBusSubscriber(modid = Theseus.MOD_ID)
 public class Player implements Serializable {
     //public PlayerEntity entity;
+    public IIdentity identity;
     public ArrayList<EnumPlayerState> state = new ArrayList<>();
     public static MinecraftServer server;
     public CharacterCard card;
@@ -35,19 +40,14 @@ public class Player implements Serializable {
     public boolean isOnline;
     public static long lastTick = 0;
 
-    public int getMaxNutrition(){
-        return 21000 + 600 * (card.attrs.constitution - 5);
-    }
-
-    public int getMaxFull(){
-        return 7000 + 200 * (card.attrs.constitution - 5);
-    }
-
-    public void genAttrs(){
-
-    }
-
     public boolean tryCast(int surgical){
+        if(attrs.physical < surgical / 2){
+            EffectPowerless.addPlayer(this, 10);
+            attrs.surgical -= surgical;
+            attrs.physical = 0;
+            return false;
+        }
+        attrs.physical -= surgical / 2;
         int d = Dice.onedX(100);
         if(d <= 50 + (card.attrs.mind * 0.5)){
             if(d != 1){
@@ -87,13 +87,11 @@ public class Player implements Serializable {
         }
     }
 
-    public boolean doJumpConsumption(){
+    public void doJumpConsumption(){
         if(attrs.physical < Math.ceil((float)card.attrs.speed / 3f)){
             EffectPowerless.addPlayer(this, 10);
-            return false;
         }else{
             attrs.physical -= (int)Math.ceil((float)card.attrs.speed / 3f);
-            return true;
         }
     }
 
@@ -150,23 +148,42 @@ public class Player implements Serializable {
     public static void onPlayerEnter(PlayerEvent.PlayerLoggedInEvent event){
         Player player = byPlayerEntity(event.getPlayer());
         if(player == null){
-            Player p = new Player();
-            p.attrs = new PlayerAttributes();
-            p.card = new CharacterCard(new ArrayList<>(), new CardAttributes());
-            p.name = event.getPlayer().getName().getString();
-            p.card.attrs.constitution = 50;
-            p.card.attrs.speed = 90;
-            WorldData.get(event.getEntity().level).addPlayer(p); //TODO: Generate attributes
+            createNewPlayer(event.getPlayer());
         }else{
             player.isOnline = true;
         }
     }
 
+    public static void createNewPlayer(PlayerEntity entity){
+        Player p = new Player();
+        p.attrs = new PlayerAttributes();
+        p.card = new CharacterCard(new CardAttributes());
+        p.name = entity.getName().getString();
+        p.card.attrs.genAttribute();
+        Networking.INSTANCE.send(
+                PacketDistributor.PLAYER.with(
+                        () -> (ServerPlayerEntity) entity
+                ),
+                new PacketGenAttribute(p.card.attrs)
+        );
+        WorldData.get(entity.level).addPlayer(p); //TODO: Generate attributes
+    }
+
+    public void setIdentity(IIdentity id){
+        if(isOnline){
+            return;
+        }
+        id.onSelect(this);
+        identity = id;
+        isOnline = true;
+    }
+
     @SubscribeEvent
     public static void onDeath(LivingDeathEvent event){
         if (event.getEntity() instanceof PlayerEntity){
-
-            //TODO: Respawn
+            Player p = byPlayerEntity((PlayerEntity) event.getEntity());
+            WorldData.get(p.getEntity().level).playerList.remove(p);
+            createNewPlayer((PlayerEntity) event.getEntity());
         }
     }
 

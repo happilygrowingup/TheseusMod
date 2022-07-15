@@ -12,26 +12,18 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-public class EggTransformer implements ITransformer<ClassNode> ,Opcodes{
+public class JumpTransformer implements ITransformer<ClassNode>, Opcodes {
     @Nonnull
     @Override
     public ClassNode transform(ClassNode input, ITransformerVotingContext context) {
-        String name = "field_213101_e";
-        for(FieldNode fn :input.fields){
-            if(fn.name.equals("minceraftEasterEgg")){
-                name = "minceraftEasterEgg";
-                break;
-            }
-        }
-        for (MethodNode node: input.methods) {
-            if(Objects.equals(node.name, "<init>")){
-                for (AbstractInsnNode insn: node.instructions) {
+        for(MethodNode mn: input.methods){
+            if(Objects.equals(mn.name, "func_225607_a_") || Objects.equals(mn.name, "tick")){
+                for(AbstractInsnNode insn: mn.instructions){
                     if(insn.getOpcode() == RETURN){
                         InsnList list = new InsnList();
                         list.add(new VarInsnNode(ALOAD, 0));
-                        list.add(new InsnNode(ICONST_1));
-                        list.add(new FieldInsnNode(PUTFIELD, "net/minecraft/client/gui/screen/MainMenuScreen", name, "Z"));
-                        node.instructions.insertBefore(insn, list);
+                        list.add(new MethodInsnNode(INVOKESTATIC, "com/growuphappily/theseus/network/PacketJumpState", "onJump", "(Lnet/minecraft/util/MovementInputFromOptions;)V"));
+                        mn.instructions.insertBefore(insn, list);
                     }
                 }
             }
@@ -48,6 +40,6 @@ public class EggTransformer implements ITransformer<ClassNode> ,Opcodes{
     @Nonnull
     @Override
     public Set<Target> targets() {
-        return new HashSet<Target>(Arrays.asList(Target.targetClass("net.minecraft.client.gui.screen.MainMenuScreen")));
+        return new HashSet<>(Arrays.asList(Target.targetClass("net.minecraft.util.MovementInputFromOptions")));
     }
 }
