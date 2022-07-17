@@ -9,6 +9,7 @@ import net.minecraftforge.fml.config.ModConfig;
 public class Theseus {
     public final static String MOD_ID = "theseus";
     public final static boolean IS_DEMO = true;
+    public final static boolean isDebug = true;
     public final static String version = "1.0-DEV";
     public Theseus(){
         MinecraftForge.EVENT_BUS.register(this);

@@ -7,6 +7,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 public class PacketIdentity {
@@ -18,7 +19,7 @@ public class PacketIdentity {
 
     public PacketIdentity(PacketBuffer buf){
         try {
-            SerializeUtil.unserialize(buf.readByteArray());
+            SerializeUtil.unSerialize(buf.readByteArray());
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
@@ -34,8 +35,8 @@ public class PacketIdentity {
 
     public void handler(Supplier<NetworkEvent.Context> ctx){
         ctx.get().enqueueWork(() -> {
-            if(Player.byPlayerEntity(ctx.get().getSender()) != null){
-                Player.byPlayerEntity(ctx.get().getSender()).setIdentity(msg);
+            if(Player.byPlayerEntity(Objects.requireNonNull(ctx.get().getSender())) != null){
+                Player.byPlayerEntity(Objects.requireNonNull(ctx.get().getSender())).setIdentity(msg);
             }
         });
         ctx.get().setPacketHandled(true);

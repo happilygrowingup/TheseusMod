@@ -4,6 +4,7 @@ import com.growuphappily.theseus.Theseus;
 import com.growuphappily.theseus.util.SerializeUtil;
 import com.growuphappily.theseus.world.player.Player;
 import com.growuphappily.theseus.world.time.Time;
+import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.nbt.ByteArrayNBT;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
@@ -16,6 +17,7 @@ import org.apache.logging.log4j.LogManager;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
 
 @Mod.EventBusSubscriber(modid = Theseus.MOD_ID)
 public class WorldData extends WorldSavedData {
@@ -36,20 +38,21 @@ public class WorldData extends WorldSavedData {
             playerListNBT.forEach((pnbt)->{
                 ByteArrayNBT bnbt = (ByteArrayNBT)pnbt;
                 try {
-                    playerList.add((Player) SerializeUtil.unserialize(bnbt.getAsByteArray()));
+                    playerList.add((Player) SerializeUtil.unSerialize(bnbt.getAsByteArray()));
                 } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
                 }
             });
         }
         try {
-            time = (Time) SerializeUtil.unserialize(nbt.getByteArray("TimeData"));
+            time = (Time) SerializeUtil.unSerialize(nbt.getByteArray("TimeData"));
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
 
     @Override
+    @MethodsReturnNonnullByDefault
     public CompoundNBT save(CompoundNBT nbt) {
         ListNBT playerListNBT = new ListNBT();
         this.playerList
@@ -82,15 +85,15 @@ public class WorldData extends WorldSavedData {
         if(world.isClientSide){
             throw new RuntimeException("Attempt to get world data in a client world");
         }
-        WorldData worldData = world.getServer().getLevel(World.OVERWORLD).getDataStorage().get(WorldData::new,NAME);
+        WorldData worldData = Objects.requireNonNull(Objects.requireNonNull(world.getServer()).getLevel(World.OVERWORLD)).getDataStorage().get(WorldData::new,NAME);
         if(worldData == null){
             LogManager.getLogger().info("World Init");
             WorldData data = new WorldData();
             data.time = new Time();
             data.playerList = new ArrayList<>();
             data.setDirty();
-            world.getServer().getLevel(World.OVERWORLD).getDataStorage().set(data);
-            world.getServer().getLevel(World.OVERWORLD).getDataStorage().save();
+            Objects.requireNonNull(world.getServer().getLevel(World.OVERWORLD)).getDataStorage().set(data);
+            Objects.requireNonNull(world.getServer().getLevel(World.OVERWORLD)).getDataStorage().save();
             return data;
         }else{
             return worldData;

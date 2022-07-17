@@ -9,7 +9,7 @@ public class SerializeUtil {
         out.writeObject(obj);
         return in.toByteArray();
     }
-    public static Object unserialize(byte[] bytes) throws IOException, ClassNotFoundException {
+    public static Object unSerialize(byte[] bytes) throws IOException, ClassNotFoundException {
         ByteArrayInputStream bin = new ByteArrayInputStream(bytes);
         ObjectInputStream in = new ObjectInputStream(bin);
         return in.readObject();

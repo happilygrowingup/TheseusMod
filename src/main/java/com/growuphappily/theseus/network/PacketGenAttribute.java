@@ -14,7 +14,7 @@ public class PacketGenAttribute {
 
     public PacketGenAttribute(PacketBuffer buf){
         try {
-            msg = (CardAttributes) SerializeUtil.unserialize(buf.readByteArray());
+            msg = (CardAttributes) SerializeUtil.unSerialize(buf.readByteArray());
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
             msg = new CardAttributes();

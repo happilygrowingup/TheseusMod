@@ -1,9 +1,9 @@
 package com.growuphappily.theseus.world.player;
 
 import net.minecraft.entity.ai.attributes.Attributes;
-import org.w3c.dom.Attr;
 
 import java.io.Serializable;
+import java.util.Objects;
 import java.util.Random;
 
 public class CardAttributes implements Serializable {
@@ -25,8 +25,8 @@ public class CardAttributes implements Serializable {
     public int genTime = 4;
 
     public void doAttrSync(Player p){
-        p.getEntity().getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0.1 + speed*0.1);
-        p.getEntity().getAttribute(Attributes.MAX_HEALTH).setBaseValue(getMaxHealth());
+        Objects.requireNonNull(p.getEntity().getAttribute(Attributes.MOVEMENT_SPEED)).setBaseValue(0.1 + speed*0.1);
+        Objects.requireNonNull(p.getEntity().getAttribute(Attributes.MAX_HEALTH)).setBaseValue(getMaxHealth());
         p.getEntity().setHealth(p.attrs.health);
     }
 

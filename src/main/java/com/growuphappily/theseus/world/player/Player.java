@@ -5,6 +5,8 @@ import com.growuphappily.theseus.network.Networking;
 import com.growuphappily.theseus.network.PacketGenAttribute;
 import com.growuphappily.theseus.util.Dice;
 import com.growuphappily.theseus.world.WorldData;
+import com.growuphappily.theseus.world.events.JudgeEvent;
+import com.growuphappily.theseus.world.events.JudgeType;
 import com.growuphappily.theseus.world.player.effects.EffectPowerless;
 import com.growuphappily.theseus.world.player.effects.EnumPlayerState;
 import com.growuphappily.theseus.world.player.identity.IIdentity;
@@ -12,6 +14,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
@@ -47,18 +50,21 @@ public class Player implements Serializable {
             attrs.physical = 0;
             return false;
         }
-        attrs.physical -= surgical / 2;
         int d = Dice.onedX(100);
+        MinecraftForge.EVENT_BUS.post(new JudgeEvent(JudgeType.SIZE, d, (int)(card.attrs.mind * 0.5f)));
         if(d <= 50 + (card.attrs.mind * 0.5)){
             if(d != 1){
                 attrs.surgical -= surgical;
+                attrs.physical -= surgical / 2;
             }
             return true;
         }else{
             if(d == 100){
                 attrs.surgical -= 2 * surgical;
+                attrs.physical -= surgical;
             }else{
                 attrs.surgical -= surgical;
+                attrs.physical -= surgical / 2;
             }
             return false;
         }
@@ -140,7 +146,10 @@ public class Player implements Serializable {
     @SubscribeEvent
     public static void onHurt(LivingHurtEvent event){
         if(event.getEntity() instanceof PlayerEntity){
-            byPlayerEntity((PlayerEntity) event.getEntity()).attrs.doHurt();
+            Player p = byPlayerEntity((PlayerEntity) event.getEntity());
+            if(p != null) {
+                p.attrs.doHurt();
+            }
         }
     }
 
@@ -182,6 +191,9 @@ public class Player implements Serializable {
     public static void onDeath(LivingDeathEvent event){
         if (event.getEntity() instanceof PlayerEntity){
             Player p = byPlayerEntity((PlayerEntity) event.getEntity());
+            if(p == null){
+                return;
+            }
             WorldData.get(p.getEntity().level).playerList.remove(p);
             createNewPlayer((PlayerEntity) event.getEntity());
         }

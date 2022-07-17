@@ -26,6 +26,10 @@ public class UpdateChecker {
         CloseableHttpClient client = HttpClientBuilder.create().build();
         HttpGet get = new HttpGet("https://theseus.up.railway.app/version.html");
         HttpResponse response = client.execute(get);
+        if(response.getStatusLine().getStatusCode() != 200){
+            throw new RuntimeException("Update check returned unexpected code " + response.getStatusLine().getStatusCode());
+        }
+        client.close();
         return EntityUtils.toString(response.getEntity());
     }
     @SubscribeEvent

@@ -2,7 +2,6 @@ package com.growuphappily.theseus.network;
 
 import com.growuphappily.theseus.Theseus;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.MovementInputFromOptions;
 import net.minecraftforge.event.TickEvent;
@@ -31,9 +30,7 @@ public class PacketJumpState {
     }
 
     public void handler(Supplier<NetworkEvent.Context> ctx){
-        ctx.get().enqueueWork(() -> {
-            jumpState = msg;
-        });
+        ctx.get().enqueueWork(() -> jumpState = msg);
         ctx.get().setPacketHandled(true);
     }
 
