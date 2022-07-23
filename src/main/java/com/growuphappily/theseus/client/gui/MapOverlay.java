@@ -15,6 +15,7 @@ import net.minecraft.world.gen.Heightmap;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import org.lwjgl.glfw.GLFW;
 
 @Mod.EventBusSubscriber(modid = Theseus.MOD_ID)
 public class MapOverlay extends AbstractGui {
@@ -22,6 +23,7 @@ public class MapOverlay extends AbstractGui {
     public int centerY = 200;
     public MatrixStack stack;
     public void render(){
+        //GLFW.glfwSetWindowPos(Minecraft.getInstance().getWindow().getWindow(), 100, 100);
         int viewDistance = Minecraft.getInstance().options.renderDistance;
         int currentChunkX = Minecraft.getInstance().player.xChunk;
         int currentChunkZ = Minecraft.getInstance().player.zChunk;

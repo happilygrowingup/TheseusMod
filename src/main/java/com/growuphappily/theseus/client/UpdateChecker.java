@@ -29,12 +29,12 @@ public class UpdateChecker {
         if(response.getStatusLine().getStatusCode() != 200){
             throw new RuntimeException("Update check returned unexpected code " + response.getStatusLine().getStatusCode());
         }
-        client.close();
         return EntityUtils.toString(response.getEntity());
     }
     @SubscribeEvent
     public static void onPlayerEnter(TickEvent.ClientTickEvent event){
         if(Minecraft.getInstance().level != lastWorld){
+            ClientSidePlayer.onExit();
             try{
                 if(!Objects.equals(getLatestVersion(), Theseus.version)){
                     Minecraft.getInstance().player.sendMessage(new TranslationTextComponent("message.update.newAvailable").append(getLatestVersion()), Util.NIL_UUID);

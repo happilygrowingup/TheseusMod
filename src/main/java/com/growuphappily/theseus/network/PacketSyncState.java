@@ -1,6 +1,9 @@
 package com.growuphappily.theseus.network;
 
 import com.growuphappily.theseus.Theseus;
+import com.growuphappily.theseus.client.ClientSidePlayer;
+import com.growuphappily.theseus.util.SerializeUtil;
+import com.growuphappily.theseus.world.player.effects.EnumPlayerState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.MovementInputFromOptions;
@@ -9,28 +12,40 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.network.NetworkEvent;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.function.Supplier;
 
 @Mod.EventBusSubscriber(modid = Theseus.version)
-public class PacketJumpState {
+public class PacketSyncState {
     public static boolean jumpState;
+    public ArrayList<EnumPlayerState> msg;
 
-    public boolean msg;
-
-    public PacketJumpState(boolean state){
-        msg = state;
+    public PacketSyncState(ArrayList<EnumPlayerState> states){
+        msg = states;
     }
 
-    public PacketJumpState(PacketBuffer buf){
-        msg = buf.readBoolean();
+    public PacketSyncState(PacketBuffer buf){
+        try {
+            msg = (ArrayList<EnumPlayerState>) SerializeUtil.unSerialize(buf.readByteArray(buf.readVarInt()));
+        } catch (IOException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void toBytes(PacketBuffer buf){
-        buf.writeBoolean(msg);
+        try {
+            buf.writeByteArray(SerializeUtil.serialize(msg));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void handler(Supplier<NetworkEvent.Context> ctx){
-        ctx.get().enqueueWork(() -> jumpState = msg);
+        ctx.get().enqueueWork(() -> {
+            jumpState = msg.contains(EnumPlayerState.POWERLESS);
+            ClientSidePlayer.states = msg;
+        });
         ctx.get().setPacketHandled(true);
     }
 

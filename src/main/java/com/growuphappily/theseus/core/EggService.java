@@ -33,6 +33,6 @@ public class EggService implements ITransformationService {
     @Nonnull
     @Override
     public List<ITransformer> transformers() {
-        return Arrays.asList(new EggTransformer(), new JumpTransformer(), new AutoJumpTransformer());
+        return Arrays.asList(new EggTransformer(), new JumpTransformer(), new AutoJumpTransformer() );//, new HeightTransformer(), new ChunkHeightTransformer());
     }
 }

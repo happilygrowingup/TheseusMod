@@ -33,10 +33,10 @@ public class Networking {
         );
         INSTANCE.registerMessage(
                 getID(),
-                PacketGenAttribute.class,
-                PacketGenAttribute::toBytes,
-                PacketGenAttribute::new,
-                PacketGenAttribute::handler
+                PacketSyncAttribute.class,
+                PacketSyncAttribute::toBytes,
+                PacketSyncAttribute::new,
+                PacketSyncAttribute::handler
         );
         INSTANCE.registerMessage(
                 getID(),
@@ -47,10 +47,10 @@ public class Networking {
         );
         INSTANCE.registerMessage(
                 getID(),
-                PacketJumpState.class,
-                PacketJumpState::toBytes,
-                PacketJumpState::new,
-                PacketJumpState::handler
+                PacketSyncState.class,
+                PacketSyncState::toBytes,
+                PacketSyncState::new,
+                PacketSyncState::handler
         );
         INSTANCE.registerMessage(
                 getID(),

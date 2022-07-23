@@ -2,7 +2,8 @@ package com.growuphappily.theseus.world.player;
 
 import com.growuphappily.theseus.Theseus;
 import com.growuphappily.theseus.network.Networking;
-import com.growuphappily.theseus.network.PacketGenAttribute;
+import com.growuphappily.theseus.network.PacketSyncState;
+import com.growuphappily.theseus.network.PacketSyncAttribute;
 import com.growuphappily.theseus.util.Dice;
 import com.growuphappily.theseus.world.WorldData;
 import com.growuphappily.theseus.world.events.JudgeEvent;
@@ -35,7 +36,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class Player implements Serializable {
     //public PlayerEntity entity;
     public IIdentity identity;
-    public ArrayList<EnumPlayerState> state = new ArrayList<>();
+    public ArrayList<EnumPlayerState> state = new ArrayList<>(); //TODO: Change Effect System
     public static MinecraftServer server;
     public CharacterCard card;
     public PlayerAttributes attrs;
@@ -68,6 +69,10 @@ public class Player implements Serializable {
             }
             return false;
         }
+    }
+
+    public void doEffectDurance(){
+
     }
 
     public boolean doAttackPhysicalConsumption(){
@@ -139,6 +144,7 @@ public class Player implements Serializable {
             p.attrs.doRegen(p);
             if(lastTick + (long)1000 <= System.currentTimeMillis()) {
                 p.doRunConsumption();
+                Networking.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) p.getEntity()), new PacketSyncState(p.state));
             }
         }
     }
@@ -160,6 +166,8 @@ public class Player implements Serializable {
             createNewPlayer(event.getPlayer());
         }else{
             player.isOnline = true;
+            Networking.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) event.getPlayer()), new PacketSyncState(player.state));
+            Networking.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) event.getPlayer()), new PacketSyncAttribute(player.card.attrs));
         }
     }
 
@@ -173,9 +181,9 @@ public class Player implements Serializable {
                 PacketDistributor.PLAYER.with(
                         () -> (ServerPlayerEntity) entity
                 ),
-                new PacketGenAttribute(p.card.attrs)
+                new PacketSyncAttribute(p.card.attrs)
         );
-        WorldData.get(entity.level).addPlayer(p); //TODO: Generate attributes
+        WorldData.get(entity.level).addPlayer(p);
     }
 
     public void setIdentity(IIdentity id){
